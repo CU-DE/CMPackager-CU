@@ -1,0 +1,72 @@
+<ApplicationDef>
+	<Application>
+		<Name>MD - CMP - Slack</Name>
+		<Description>Uninstallation requires a reboot. Please save all work and close all programs before uninstalling.
+
+Slack is a cloud-based team collaboration tool. Slack is Licensed for all UTO Staff.</Description>
+		<Publisher>Slack</Publisher>
+		<AutoInstall>True</AutoInstall>
+		<UserDocumentation>https://slack.com/help/articles/212475728-Deploy-Slack-via-Microsoft-Installer</UserDocumentation>
+		<Icon>Slack.ico</Icon>
+		<FolderPath>MD\Imaging\CMPackager\Test</FolderPath>
+	</Application>
+	<Downloads>
+		<Download DeploymentType="DeploymentType1">
+			<PrefetchScript></PrefetchScript>
+			<URL>https://slack.com/ssb/download-win64-msi</URL>
+			<Version></Version>
+			<FullVersion></FullVersion>
+			<DownloadFileName>SlackSetup.msi</DownloadFileName>
+			<DownloadVersionCheck>$Version = ([String](Get-MSIInfo -Path $TempDir\SlackSetup.msi -Property ProductVersion)).TrimStart().TrimEnd()</DownloadVersionCheck>
+			<ExtraCopyFunctions>Copy-Item $ScriptRoot\ExtraFiles\Uninstall_Scripts\Slack_Machine-Wide\* -Destination $DestinationPath -Recurse -Force</ExtraCopyFunctions>
+		</Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>Slack Silent Install</DeploymentTypeName>
+			<InstallationType>MSI</InstallationType>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallationMSI>SlackSetup.msi</InstallationMSI>
+			<UninstallCmd>Uninstall.bat</UninstallCmd>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<EstRuntimeMins>15</EstRuntimeMins>
+			<MaxRuntimeMins>30</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>Custom</DetectionMethodType>
+			<CustomDetectionMethods>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>Slack.exe</Name>
+					<Path>%ProgramFiles%\Slack</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+				<DetectionClauseExpression>
+					<DetectionClauseConnector>
+						<!-- The connector clause specifies the index of the detection method above to apply the clasue to. For a detection method with 2 clauses, you would choose
+						1 as the connector clause to add the Connector between clause0 and clause1 -->
+						<ConnectorClause>1</ConnectorClause>
+						<ConnectorClauseConnector>OR</ConnectorClauseConnector>
+					</DetectionClauseConnector>
+				</DetectionClauseExpression>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>Slack.exe</Name>
+					<Path>%ProgramFiles(x86)%\Slack</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+			</CustomDetectionMethods>
+			<LatestApplicationName>MD - CMP - Slack - Latest</LatestApplicationName>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Deployment>
+		<DeploySoftware>True</DeploySoftware>
+	</Deployment>
+</ApplicationDef>

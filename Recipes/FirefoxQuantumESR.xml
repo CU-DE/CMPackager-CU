@@ -1,0 +1,88 @@
+<ApplicationDef>
+	<Application>
+		<Name>MD - CMP - Mozilla Firefox ESR</Name>
+		<Description>Uninstallation requires a reboot. Please save all work and close all programs before uninstalling.
+
+Uninstall may fail if you have an older version of Firefox (32-bit). If you are having trouble uninstalling please reach out to your normal IT support team.
+
+Mozilla Firefox (or simply Firefox) is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. WARNING: During software updates, patches, and installs, your system may reboot without notice. We recommend that you always save and close all applications prior to starting this process.</Description>
+		<Publisher>Mozilla</Publisher>
+		<AutoInstall>True</AutoInstall>
+		<UserDocumentation>https://support.mozilla.org/en-US/</UserDocumentation>
+		<Icon>FirefoxQ.ico</Icon>
+		<FolderPath>MD\Imaging\CMPackager\Test</FolderPath>
+	</Application>
+	<Downloads>
+		<Download DeploymentType="DeploymentType1">
+			<PrefetchScript>
+			$Version = (ConvertFrom-JSON (Invoke-WebRequest -URI "https://product-details.mozilla.org/1.0/firefox_versions.json").Content).FIREFOX_ESR
+			$URL = "https://download.mozilla.org/?product=firefox-$Version-SSL&amp;os=win64&amp;lang=en-US"
+			Add-LogContent "$URL"
+			</PrefetchScript>
+			<URL></URL>
+			<DownloadFileName>FirefoxQuantumx64.exe</DownloadFileName>
+			<DownloadVersionCheck>&amp; $ScriptRoot\7za.exe x "$TempDir\FirefoxQuantumx64.exe" -o"$TempDir\FireFoxqTempx64" -y
+			$Version = (get-item $TempDir\FireFoxQTempx64\Setup.exe).VersionInfo.ProductVersion
+			</DownloadVersionCheck>
+			<FullVersion></FullVersion>
+			<Version></Version>
+		</Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>Firefox ESR x64 Silent Install</DeploymentTypeName>
+			<InstallationType>Script</InstallationType>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>FirefoxQuantumx64.exe -ms</InstallProgram>
+			<UninstallCmd>`"%ProgramFiles%\Mozilla Firefox\uninstall\helper.exe`" -ms</UninstallCmd>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<EstRuntimeMins>5</EstRuntimeMins>
+			<MaxRuntimeMins>20</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>Custom</DetectionMethodType>
+			<CustomDetectionMethods>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>firefox.exe</Name>
+					<Path>%ProgramFiles%\Mozilla Firefox</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+				<DetectionClauseExpression>
+					<DetectionClauseConnector>
+						<!-- The connector clause specifies the index of the detection method above to apply the clasue to. For a detection method with 2 clauses, you would choose
+						1 as the connector clause to add the Connector between clause0 and clause1 -->
+						<ConnectorClause>1</ConnectorClause>
+						<ConnectorClauseConnector>OR</ConnectorClauseConnector>
+					</DetectionClauseConnector>
+				</DetectionClauseExpression>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>firefox.exe</Name>
+					<Path>%ProgramFiles(x86)%\Mozilla Firefox</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+			</CustomDetectionMethods>
+			<RequirementsRules>
+				<RequirementsRule>
+					<RequirementsRuleType>Existential</RequirementsRuleType>
+					<RequirementsRuleValue>
+						<RuleValue>True</RuleValue>
+					</RequirementsRuleValue>
+					<RequirementsRuleGlobalCondition>AutoPackage - OSArchitecture x64</RequirementsRuleGlobalCondition>
+				</RequirementsRule>
+			</RequirementsRules>
+			<LatestApplicationName>MD - CMP - Mozilla Firefox ESR - Latest</LatestApplicationName>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Deployment>
+		<DeploySoftware>True</DeploySoftware>
+	</Deployment>
+</ApplicationDef>

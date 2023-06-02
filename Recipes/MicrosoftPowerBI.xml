@@ -1,0 +1,67 @@
+<ApplicationDef>
+    <Application>
+        <Name>MD - CMP - Microsoft Power BI Desktop</Name>
+        <Description>Power BI is a suite of business analytics tools that deliver insights throughout your organization. Connect to hundreds of data sources, simplify data prep, and drive ad hoc analysis. Produce beautiful reports, then publish them for your organization to consume on the web and across mobile devices. Everyone can create personalized dashboards with a unique, 360-degree view of their business. And scale across the enterprise, with governance and security built-in.</Description>
+        <Publisher>Microsoft</Publisher>
+        <AutoInstall>True</AutoInstall>
+        <UserDocumentation>https://www.microsoft.com/en-us/download/details.aspx?id=58494</UserDocumentation>
+        <Icon>PowerBIDesktop.ico</Icon>
+		<FolderPath>MD\Imaging\CMPackager\Test</FolderPath>
+    </Application>
+    <Downloads>
+        <Download DeploymentType="DeploymentType1">
+            <PrefetchScript>$URL = ((Invoke-WebRequest "https://www.microsoft.com/en-us/download/confirmation.aspx?id=58494" -UseBasicParsing).Links | Where-Object href -like "*PBIDesktopSetup_x64.exe")[0].href</PrefetchScript>
+            <URL></URL>
+            <DownloadFileName>PBIDesktopSetup_x64.exe</DownloadFileName>
+            <DownloadVersionCheck>$Version = ((Get-item $TempDir\$DownloadFileName).VersionInfo.FileVersion).TrimStart().TrimEnd()</DownloadVersionCheck>
+            <FullVersion></FullVersion>
+            <Version></Version>
+        </Download>
+    </Downloads>
+    <DeploymentTypes>
+        <DeploymentType Name="DeploymentType1">
+            <DeploymentTypeName>Silent Installer for Microsoft PowerBI Desktop x64</DeploymentTypeName>
+            <InstallationType>Script</InstallationType>
+            <Comments>Silent Installer for Microsoft PowerBI Desktop x64</Comments>
+            <Language>English</Language>
+            <CacheContent>False</CacheContent>
+            <BranchCache>True</BranchCache>
+            <ContentFallback>True</ContentFallback>
+            <OnSlowNetwork>Download</OnSlowNetwork>
+            <InstallProgram>PBIDesktopSetup_x64.exe -s -norestart ACCEPT_EULA=1 INSTALLDESKTOPSHORTCUT=0 DISABLE_UPDATE_NOTIFICATION=1</InstallProgram>
+			<UninstallCmd>PBIDesktopSetup_x64.exe -s -uninstall</UninstallCmd>
+            <InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+            <LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+            <UserInteractionMode>Hidden</UserInteractionMode>
+            <ReqUserInteraction>False</ReqUserInteraction>
+            <EstRuntimeMins>5</EstRuntimeMins>
+            <MaxRuntimeMins>20</MaxRuntimeMins>
+            <RebootBehavior>BasedOnExitCode</RebootBehavior>
+            <DetectionMethodType>CustomScript</DetectionMethodType>
+            <ScriptLanguage>PowerShell</ScriptLanguage>
+            <DetectionMethod>$InstalledItem = (Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" -ErrorAction SilentlyContinue | where-object {$_.GetValue("DisplayName") -eq "Microsoft Power BI Desktop (x64)"})
+if (-not ([System.String]::IsNullorEmpty($InstalledItem))){
+    if ([Version]$($InstalledItem.GetValue("DisplayVersion")) -ge [Version]"$Version"){
+        write-Output "Installed"
+    }
+}
+            </DetectionMethod>
+            <RequirementsRules>
+                <RequirementsRule>
+                    <RequirementsRuleType>Existential</RequirementsRuleType>
+                    <RequirementsRuleValue>
+                        <RuleValue>True</RuleValue>
+                    </RequirementsRuleValue>
+                    <RequirementsRuleGlobalCondition>AutoPackage - OSArchitecture x64</RequirementsRuleGlobalCondition>
+                </RequirementsRule>
+            </RequirementsRules>
+			<LatestApplicationName>MD - CMP - Microsoft Power BI - Latest</LatestApplicationName>
+        </DeploymentType>
+    </DeploymentTypes>
+    <Distribution>
+        <DistributeContent>True</DistributeContent>
+    </Distribution>
+    <Deployment>
+        <DeploySoftware>True</DeploySoftware>
+    </Deployment>
+</ApplicationDef>

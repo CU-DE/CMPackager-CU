@@ -1,0 +1,85 @@
+<ApplicationDef>
+	<Application>
+		<Name>MD - CMP - NotePad++</Name>
+		<Description>Uninstallation requires a reboot. Please save all work and close all programs before uninstalling.
+
+Uninstall may fail if you have an older version of Notepad++ (32-bit). If you are having trouble uninstalling please reach out to your normal IT support team.
+
+Notepad++ is a free source code editor and Notepad replacement that supports several languages. Running in the MS Windows environment, its use is governed by GPL License.</Description>
+		<Publisher>Don Ho</Publisher>
+		<AutoInstall>True</AutoInstall>
+		<UserDocumentation>https://notepad-plus-plus.org/</UserDocumentation>
+		<Icon>Notepad++.ico</Icon>
+		<FolderPath>MD\Imaging\CMPackager\Test</FolderPath>
+	</Application>
+	<Downloads>
+		<Download DeploymentType="DeploymentType1">
+			<PrefetchScript>$linkPath = ((Invoke-WebRequest -URI https://notepad-plus-plus.org -UseBasicParsing) | Select-Object -ExpandProperty links | Where-Object -Property href -like "/downloads/v*").href 
+			$downloadurl = "https://notepad-plus-plus.org$linkpath"
+			$url = ((Invoke-WebRequest -URI $downloadurl -UseBasicParsing) | Select-Object -ExpandProperty links | Where-Object -Property href -like "*npp.*.installer.x64.exe").href | Select-Object -Index 0</PrefetchScript>
+			<URL></URL>
+			<DownloadFileName>NotePadppInstallerx64.exe</DownloadFileName>
+			<Version></Version>
+			<FullVersion></FullVersion>
+			<DownloadVersionCheck>$Version = (Get-item $TempDir\$DownloadFileName).VersionInfo.FileVersion</DownloadVersionCheck>
+			<ExtraCopyFunctions></ExtraCopyFunctions>
+		</Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>NotePad++ Silent Installer x64</DeploymentTypeName>
+			<InstallationType>Script</InstallationType>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>NotePadppInstallerx64.exe /noUpdater /S</InstallProgram>
+			<UninstallCmd>`"%ProgramFiles%\Notepad++\uninstall.exe`" /S</UninstallCmd>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<EstRuntimeMins>15</EstRuntimeMins>
+			<MaxRuntimeMins>60</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>Custom</DetectionMethodType>
+			<CustomDetectionMethods>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>notepad++.exe</Name>
+					<Path>%ProgramFiles%\Notepad++\</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+				<DetectionClauseExpression>
+					<DetectionClauseConnector>
+						<!-- The connector clause specifies the index of the detection method above to apply the clasue to. For a detection method with 2 clauses, you would choose
+						1 as the connector clause to add the Connector between clause0 and clause1 -->
+						<ConnectorClause>1</ConnectorClause>
+						<ConnectorClauseConnector>OR</ConnectorClauseConnector>
+					</DetectionClauseConnector>
+				</DetectionClauseExpression>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>notepad++.exe</Name>
+					<Path>%ProgramFiles(x86)%\Notepad++\</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+			</CustomDetectionMethods>
+			<RequirementsRules>
+				<RequirementsRule>
+					<RequirementsRuleType>Existential</RequirementsRuleType>
+					<RequirementsRuleValue>
+						<RuleValue>True</RuleValue>
+					</RequirementsRuleValue>
+					<RequirementsRuleGlobalCondition>AutoPackage - OSArchitecture x64</RequirementsRuleGlobalCondition>
+				</RequirementsRule>
+			</RequirementsRules>
+			<LatestApplicationName>MD - CMP - NotePad++ - Latest</LatestApplicationName>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Deployment>
+		<DeploySoftware>True</DeploySoftware>
+	</Deployment>
+</ApplicationDef>

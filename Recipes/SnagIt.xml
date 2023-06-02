@@ -1,0 +1,55 @@
+<ApplicationDef>
+	<Application>
+		<Name>MD - TESTCMP - SnagIt</Name>
+		<Description>Snagit helps you quickly share information in a way that's easy to understand. Capture your screen and camera, add additional context and move work forward faster.</Description>
+		<Publisher>TechSmith</Publisher>
+		<AutoInstall>True</AutoInstall>
+		<UserDocumentation>https://www.techsmith.com/screen-capture.html</UserDocumentation>
+		<Icon>SnagitIcon.ico</Icon>
+		<FolderPath>MD\Imaging\CMPackager\Test</FolderPath>
+	</Application>
+	<Downloads>
+		<Download DeploymentType="DeploymentType1">
+			<PrefetchScript>$URL = "https://download.techsmith.com/snagit/releases/snagit.msi"</PrefetchScript>
+			<URL></URL>
+			<DownloadFileName>SnagIt.msi</DownloadFileName>
+			<Version></Version>
+			<FullVersion></FullVersion>
+			<DownloadVersionCheck>$Version = ([String](Get-MSIInfo -Path $DownloadFile -Property ProductVersion)).TrimStart().TrimEnd()</DownloadVersionCheck>
+			<ExtraCopyFunctions>Copy-Item $ScriptRoot\ExtraFiles\Uninstall_Scripts\SnagIt\* -Destination $DestinationPath -Recurse -Force</ExtraCopyFunctions>
+		</Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>SnagIt Silent Install</DeploymentTypeName>
+			<InstallationType>MSI</InstallationType>
+			<Comments>Silent Installer for SnagIt</Comments>
+			<Language>English</Language>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallationMSI>SnagIt.msi</InstallationMSI>
+			<UninstallCmd>Uninstall.bat</UninstallCmd>
+			<InstallProgram>msiexec.exe /i SnagIt.msi /qn /norestart</InstallProgram>
+			<Force32bit>False</Force32bit>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<ReqUserInteraction>False</ReqUserInteraction>
+			<EstRuntimeMins>5</EstRuntimeMins>
+			<MaxRuntimeMins>15</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>CustomScript</DetectionMethodType>
+            <ScriptLanguage>PowerShell</ScriptLanguage>
+            <DetectionMethod>if (Test-Path "C:\ProgramFiles\Techsmith\Snagit*\SnagitCapture.exe) {write-Output "Installed"}</DetectionMethod>
+			<LatestApplicationName>MD - TESTCMP - SnagIt - Latest</LatestApplicationName>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Deployment>
+		<DeploySoftware>True</DeploySoftware>
+	</Deployment>
+</ApplicationDef>
