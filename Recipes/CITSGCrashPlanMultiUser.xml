@@ -1,0 +1,96 @@
+<ApplicationDef>
+	<Application>
+		<Name>MD-CMP-CITSG-CrashPlan-MultiUser</Name>
+		<Description>Certified Desktop CrashPlan Data Backup Installer</Description>
+		<Publisher>CrashPlan</Publisher>
+		<AutoInstall>True</AutoInstall>
+		<UserDocumentation>https://it.cornell.edu/crashplan</UserDocumentation>
+		<Icon>Code42.png</Icon>
+		<FolderPath>MD\Imaging\CMPackager\Test</FolderPath>
+	</Application>
+	<Downloads>
+		<Download DeploymentType="DeploymentType1">
+			<PrefetchScript></PrefetchScript>
+			<URL>https://download.crashplan.com/installs/agent/latest-win64.msi</URL>
+			<DownloadFileName>crashplan.msi</DownloadFileName>
+			<Version></Version>
+			<FullVersion></FullVersion>
+			<DownloadVersionCheck>
+			$Version = ([String](Get-MSIInfo -Path $DownloadFile -Property ProductVersion)).TrimStart().TrimEnd()
+			#.TrimStart().TrimEnd())
+			</DownloadVersionCheck>
+			<ExtraCopyFunctions>Copy-Item $ScriptRoot\ExtraFiles\Install_Scripts\CrashPlan\CITSG\crashplan_multi.ps1 -Destination $DestinationPath -Recurse -Force</ExtraCopyFunctions>
+		</Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>CrashPlan Multi User Installer for CITSG</DeploymentTypeName>
+			<InstallationType>Script</InstallationType>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>crashplan_multi.ps1</InstallProgram>
+			<UninstallCmd></UninstallCmd>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<EstRuntimeMins>5</EstRuntimeMins>
+			<MaxRuntimeMins>15</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>Custom</DetectionMethodType>
+			<CustomDetectionMethods>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>CrashPlanService.exe</Name>
+					<Path>%ProgramFiles%\CrashPlan</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+			<DetectionClauseExpression>
+				<DetectionClauseConnector>
+					<ConnectorClause>1</ConnectorClause>
+					<ConnectorClauseConnector>OR</ConnectorClauseConnector>
+				</DetectionClauseConnector>
+			</DetectionClauseExpression>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>CrashPlanService.exe</Name>
+					<Path>%ProgramFiles(x86)%\CrashPlan</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+			<DetectionClauseExpression>
+				<DetectionClauseConnector>
+					<ConnectorClause>2</ConnectorClause>
+					<ConnectorClauseConnector>OR</ConnectorClauseConnector>
+				</DetectionClauseConnector>
+			</DetectionClauseExpression>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>Code42Service.exe</Name>
+					<Path>%ProgramFiles(x86)%\Code42</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+			<DetectionClauseExpression>
+				<DetectionClauseConnector>
+					<ConnectorClause>3</ConnectorClause>
+					<ConnectorClauseConnector>OR</ConnectorClauseConnector>
+				</DetectionClauseConnector>
+			</DetectionClauseExpression>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>Code42Service.exe</Name>
+					<Path>%ProgramFiles%\Code42</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+			</CustomDetectionMethods>
+			<LatestApplicationName>MD-CMP-CITSG-CrashPlan-MultiUser-Latest</LatestApplicationName>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Deployment>
+		<DeploySoftware>True</DeploySoftware>
+		<DeploymentCollection>MD-CMPackagerTesting</DeploymentCollection>
+	</Deployment>
+</ApplicationDef>

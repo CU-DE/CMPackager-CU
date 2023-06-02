@@ -1,0 +1,51 @@
+<ApplicationDef>
+	<Application>
+		<Name>MD - CMP - Zoom Rooms</Name>
+		<Description>Conference rooms that make it easy to run or join video meetings with a tap of a button.</Description>
+		<Publisher>Zoom Video Communications Inc.</Publisher>
+		<AutoInstall>True</AutoInstall>
+		<UserDocumentation>https://zoom.us/</UserDocumentation>
+		<Icon>ZoomRooms.ico</Icon>
+		<FolderPath>MD\Imaging\CMPackager\Test</FolderPath>
+	</Application>
+	<Downloads>
+		<Download DeploymentType="DeploymentType1">
+			<PrefetchScript></PrefetchScript>
+			<URL>https://zoom.us/client/latest/ZoomRoomsInstaller.msi?archType=x64</URL>
+			<DownloadFileName>ZoomRooms.msi</DownloadFileName>
+			<Version></Version>
+			<FullVersion></FullVersion>
+			<DownloadVersionCheck>
+			$Version = ([String](Get-MSIInfo -Path $DownloadFile -Property ProductVersion)).TrimStart().TrimEnd()
+			</DownloadVersionCheck>
+		</Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>ZoomRooms Silent Installer</DeploymentTypeName>
+			<InstallationType>MSI</InstallationType>
+			<Comments>Silent Installer for ZoomRooms</Comments>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>msiexec /i ZoomRooms.msi /quiet ACCEPTGDPR=true SILENT=true</InstallProgram>
+			<InstallationMSI>ZoomRooms.msi</InstallationMSI>
+			<UninstallCmd></UninstallCmd>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<EstRuntimeMins>5</EstRuntimeMins>
+			<MaxRuntimeMins>15</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>MSI</DetectionMethodType>
+			<LatestApplicationName>MD - CMP - Zoom Rooms - Latest</LatestApplicationName>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Deployment>
+		<DeploySoftware>True</DeploySoftware>
+	</Deployment>
+</ApplicationDef>

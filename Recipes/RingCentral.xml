@@ -1,0 +1,74 @@
+<ApplicationDef>
+	<Application>
+		<Name>MD - CMP - Ring Central</Name>
+		<Description>Soft Phone App. NOTE: This application will automatically open after it is installed.</Description>
+		<Publisher>Ring Central</Publisher>
+		<AutoInstall>True</AutoInstall>
+		<UserDocumentation>https://ringcentral.com/</UserDocumentation>
+		<Icon>ringcentral.ico</Icon>
+        <FolderPath>MD\Imaging\CMPackager\Test</FolderPath>
+	</Application>
+	<Downloads>
+		<Download DeploymentType="DeploymentType1">
+			<PrefetchScript></PrefetchScript>
+			<URL>https://app.ringcentral.com/download/RingCentral-x64.msi</URL>
+			<DownloadFileName>RingCentral-x64.msi</DownloadFileName>
+			<Version></Version>
+			<FullVersion></FullVersion>
+			<DownloadVersionCheck>
+			$Version = ([String](Get-MSIInfo -Path $DownloadFile -Property ProductVersion)).TrimStart().TrimEnd()
+			#.TrimStart().TrimEnd())
+			</DownloadVersionCheck>
+			<ExtraCopyFunctions>Copy-Item $ScriptRoot\ExtraFiles\Install_Scripts\RingCentral\* -Destination $DestinationPath -Recurse -Force</ExtraCopyFunctions>
+		</Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>Ring Central Silent Installer</DeploymentTypeName>
+			<InstallationType>Script</InstallationType>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>Install_RingCentral.ps1</InstallProgram>
+			<UninstallCmd></UninstallCmd>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<EstRuntimeMins>15</EstRuntimeMins>
+			<MaxRuntimeMins>60</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>Custom</DetectionMethodType>
+			<CustomDetectionMethods>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>RingCentral.exe</Name>
+					<Path>%ProgramFiles%\RingCentral</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+				<DetectionClauseExpression>
+					<DetectionClauseConnector>
+						<!-- The connector clause specifies the index of the detection method above to apply the clasue to. For a detection method with 2 clauses, you would choose
+						1 as the connector clause to add the Connector between clause0 and clause1 -->
+						<ConnectorClause>1</ConnectorClause>
+						<ConnectorClauseConnector>OR</ConnectorClauseConnector>
+					</DetectionClauseConnector>
+				</DetectionClauseExpression>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>RingCentral.exe</Name>
+					<Path>%ProgramFiles(x86)%\RingCentral</Path>
+					<Existence>True</Existence>
+				</DetectionClause>
+			</CustomDetectionMethods>
+			<LatestApplicationName>MD - CMP - Ring Central - Latest</LatestApplicationName>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Deployment>
+		<DeploySoftware>True</DeploySoftware>
+		<DeploymentCollection>MD-CMPackagerTesting</DeploymentCollection>
+	</Deployment>
+</ApplicationDef>

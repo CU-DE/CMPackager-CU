@@ -2,9 +2,6 @@
 ExtraFiles/Scripts/AppleSUCatalog.sucatalog
 CMPackager.prefs
 
-# Ignore Recipes Folder
-Recipes/*
-
 # Ignore vscode
 .vscode/*
 
