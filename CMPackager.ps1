@@ -1510,6 +1510,70 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 					Pop-Location
 				}
 			}
+            ## Start of Clay's custom code for Latest.
+			If (-not [System.String]::IsNullOrEmpty($DeploymentType.LatestApplicationName)){
+
+				Push-Location
+				Set-Location $CMSite
+		
+		
+				$Source_Application_Name = "$ApplicationName $ApplicationSWVersion"
+				$Source_Deployment_Type_Name = $DeploymentType.DeploymentTypeName
+				$Latest_Deployment_Type_Name = "$ApplicationName $ApplicationSWVersion"
+				$Latest_Application_Name = $DeploymentType.LatestApplicationName
+	
+				$Source_Application = Get-CMApplication -Name $Source_Application_Name
+				$Source_Deployment_Types_XML = [Microsoft.ConfigurationManagement.ApplicationManagement.Serialization.SccmSerializer]::DeserializeFromString($Source_Application.SDMPackageXML,$True)
+	
+				$Latest_Application = Get-CMApplication -Name $Latest_Application_Name
+				$Latest_Application_Deployment_Types_XML = [Microsoft.ConfigurationManagement.ApplicationManagement.Serialization.SccmSerializer]::DeserializeFromString($Latest_Application.SDMPackageXML,$True)
+	
+				#Now we need to single out the Deployment Type that we want to copy to the Latest Application.
+				#An underscore is used here to denote that this is a temporary variable so there is no conflict with other variables that may be in use.
+				ForEach($_DeploymentType in $Source_Deployment_Types_XML.DeploymentTypes){
+	
+					If($_DeploymentType.title -eq $Source_Deployment_Type_Name){
+	
+						Add-LogContent "Found DT $Source_Deployment_Type_Name"
+	
+						$Copied_Deployment_Type = $_DeploymentType.Copy()
+	
+						Add-LogContent "Set new DT Name: $Latest_Deployment_Type_Name"
+	
+						$Copied_Deployment_Type.title = $Latest_Deployment_Type_Name
+						$Copied_Deployment_Type.ChangeID()
+	
+						If ($Copied_Deployment_Type.GetType().name -eq 'DeploymentType') {
+		
+							$Latest_Application_Deployment_Types_XML.DeploymentTypes.Add($Copied_Deployment_Type)
+		
+							Add-LogContent "Commit to Latest Application: $Latest_Application_Name"
+	
+							$UpdatedXML = [Microsoft.ConfigurationManagement.ApplicationManagement.Serialization.SccmSerializer]::SerializeToString($Latest_Application_Deployment_Types_XML, $True)
+							$Latest_Application.SDMPackageXML = $UpdatedXML
+							Set-CMApplication -InputObject $Latest_Application
+	
+						}
+						Else {
+			
+							Add-LogContent "ERROR: No DeploymentType $Latest_Deployment_Type_Name located"
+						}
+					}
+				}
+	
+				$Updated_Latest_Application = Get-CMApplication -Name $Latest_Application_Name
+	
+				If($Latest_Application.LocalizedCategoryInstanceNames -ne $Updated_Latest_Application.LocalizedCategoryInstanceNames){
+	
+					Add-LogContent "ERROR: Categories are not matching again."
+					Add-LogContent "Before: $($Latest_Application.LocalizedCategoryInstanceNames)"
+					Add-LogContent "After: $($Updated_Latest_Application.LocalizedCategoryInstanceNames)"
+	
+				}
+	
+				Pop-Location
+			}
+			## End of Clay's custom code for Latest.			
 		}
 		Return $DepTypeReturn
 	}
