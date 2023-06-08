@@ -1510,21 +1510,28 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 					Pop-Location
 				}
 			}
-            ## Start of Clay's custom code for Latest.
+            ## Start of Clay and Dan's custom code for Latest.
 			If (-not [System.String]::IsNullOrEmpty($DeploymentType.LatestApplicationName)){
 
 				Push-Location
 				Set-Location $CMSite
 		
-		
 				$Source_Application_Name = "$ApplicationName $ApplicationSWVersion"
 				$Source_Deployment_Type_Name = $DeploymentType.DeploymentTypeName
 				$Latest_Deployment_Type_Name = "$ApplicationName $ApplicationSWVersion"
 				$Latest_Application_Name = $DeploymentType.LatestApplicationName
-	
 				$Source_Application = Get-CMApplication -Name $Source_Application_Name
 				$Source_Deployment_Types_XML = [Microsoft.ConfigurationManagement.ApplicationManagement.Serialization.SccmSerializer]::DeserializeFromString($Source_Application.SDMPackageXML,$True)
 	
+				$emailErrorLog = $null
+
+				#check if -Latest collections exists, if not create it
+				if ($(Get-CMApplication -Name $Latest_Application_Name).LocalizedDisplayName -ne $Latest_Application_Name) {
+					Add-LogContent "Latest Application not found, creating it now"
+					New-CMApplication -Name "$Latest_Application_Name" -ReleaseDate $(Get-Date) -AutoInstall $true -Description $ApplicationDescription
+					Move-CMObject -InputObject (Get-CMApplication -Name "$Latest_Application_Name") -FolderPath ".\Application\$ApplicationFolderPath"
+				}
+
 				$Latest_Application = Get-CMApplication -Name $Latest_Application_Name
 				$Latest_Application_Deployment_Types_XML = [Microsoft.ConfigurationManagement.ApplicationManagement.Serialization.SccmSerializer]::DeserializeFromString($Latest_Application.SDMPackageXML,$True)
 	
@@ -1552,18 +1559,70 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 							$UpdatedXML = [Microsoft.ConfigurationManagement.ApplicationManagement.Serialization.SccmSerializer]::SerializeToString($Latest_Application_Deployment_Types_XML, $True)
 							$Latest_Application.SDMPackageXML = $UpdatedXML
 							Set-CMApplication -InputObject $Latest_Application
-	
-						}
-						Else {
-			
-							Add-LogContent "ERROR: No DeploymentType $Latest_Deployment_Type_Name located"
+							#Increase DeploymentType Priority to 1 and execute cleaning process if more than 4 DeploymentTypes exist
+							$appPriority = (Get-CMDeploymentType -ApplicationName $Latest_Application_Name -DeploymentTypeName $Latest_Deployment_Type_Name).PriorityInLatestApp
+                            
+							if ($appPriority -ne 1) {
+								if ($appPriority -gt 2) {
+									$cleanup = $true
+								}
+								Add-LogContent "Increasing $Latest_Deployment_Type_Name piority in $Latest_Application_Name by $($appPriority - 1)"
+								While ($appPriority -ne "1") {
+									Set-CMDeploymentType -ApplicationName $Latest_Application_Name -DeploymentTypeName $Latest_Deployment_Type_Name -Priority Increase
+									$appPriority = $appPriority - 1
+									Add-LogContent "App priority increased to $appPriority"
+								}
+								if ($(Get-CMDeploymentType -ApplicationName $Latest_Application_Name -DeploymentTypeName $Latest_Deployment_Type_Name).PriorityInLatestApp -ne 1) {
+									$emailErrorLog += "      - Error - $($Latest_Deployment_Type_Name) priority increase unsuccessful. `n"
+								}
+								if ($cleanup) {
+									Add-LogContent "There are more than 2 previous versions, apps will be cleaned if possible."
+									$oldApps = Get-CMDeploymentType -ApplicationName $Latest_Application_Name | Where-Object -Property "PriorityInLatestApp" -GT 2
+									foreach ($app in $oldApps) {
+										#Remove old DeploymentType
+										Add-LogContent "Attempitng to remove $($app.LocalizedDisplayName) Deployment Type."
+										try {
+											Remove-CMDeploymentType -InputObject $app -Force -ErrorAction Stop
+											Add-LogContent "Removed $($app.LocalizedDisplayName) Deployment Type successfully."
+										}
+										catch {
+											Add-LogContent "Error - $($app.LocalizedDisplayName) Deployment Type removal unsuccessful."
+											$emailErrorLog += "      - Error - $($app.LocalizedDisplayName) Deployment Type removal unsuccessful. `n"
+										}
+										if ($(Get-CMApplication -Name $app.LocalizedDisplayName)) {
+											#Remove legacy MD-CMPackagerTesting deployment
+											Remove-CMApplicationDeployment -Name $app.LocalizedDisplayName -CollectionName "MD-CMPackagerTesting" -Force -ErrorAction SilentlyContinue
+											#Remove old application
+											try {
+												Remove-CMApplication -Name $app.LocalizedDisplayName -Force -ErrorAction Stop
+												Add-LogContent "Removed $($app.LocalizedDisplayName) Application successfully"
+											}
+											catch {
+												Add-LogContent "Error - $($app.LocalizedDisplayName) Application removal unsuccessful"
+												$emailErrorLog += "      - Error - $($app.LocalizedDisplayName) Application removal unsuccessful. `n"
+											}
+										}
+									}
+								}
+							}
+							#error logging
+							if ($emailErrorLog) {
+								$Global:EmailBody += $emailErrorLog
+							} else {
+								$Global:EmailBody += "      - No errors to report. `n"
+							}
 						}
 					}
+					Else {
+			
+						Add-LogContent "ERROR: No DeploymentType $Latest_Deployment_Type_Name located"
+					}
 				}
+				
 	
 				$Updated_Latest_Application = Get-CMApplication -Name $Latest_Application_Name
 	
-				If($Latest_Application.LocalizedCategoryInstanceNames -ne $Updated_Latest_Application.LocalizedCategoryInstanceNames){
+				If ($Latest_Application.LocalizedCategoryInstanceNames -ne $Updated_Latest_Application.LocalizedCategoryInstanceNames) {
 	
 					Add-LogContent "ERROR: Categories are not matching again."
 					Add-LogContent "Before: $($Latest_Application.LocalizedCategoryInstanceNames)"
@@ -1573,7 +1632,7 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 	
 				Pop-Location
 			}
-			## End of Clay's custom code for Latest.			
+			## End of Clay and Dan's custom code for -Latest, priority increase, and previous version cleanup.			
 		}
 		Return $DepTypeReturn
 	}
